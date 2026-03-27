@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyApp007 - Premium Memo</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-color: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --danger-color: #f43f5e;
+            --danger-hover: #e11d48;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(215, 98%, 61%, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, hsla(190, 98%, 61%, 0.1) 0px, transparent 50%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        header {
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            letter-spacing: 0.025em;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            padding: 1rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            resize: none;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+        }
+
+        button#save-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.875rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        button#save-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        }
+
+        button#save-btn:active {
+            transform: translateY(0);
+        }
+
+        .memo-list-container {
+            border-top: 1px solid var(--glass-border);
+            padding-top: 2rem;
+        }
+
+        h2 {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-weight: 400;
+        }
+
+        #memo-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 2rem 0;
+            font-style: italic;
+        }
+
+        .status-fail { background: rgba(244, 63, 94, 0.2); color: #fb7185; }
+
+        /* M2: Memo Item Styles */
+        .memo-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .memo-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .memo-text {
+            color: var(--text-primary);
+            font-size: 1rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .memo-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .memo-date {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .delete-btn {
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            background: rgba(244, 63, 94, 0.1);
+            color: var(--danger-color);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Premium Memo</h1>
+        <p class="subtitle">MyApp007 - SSOT v3.1 Process</p>
+    </header>
+
+    <div class="input-group">
+        <textarea id="memo-input" placeholder="메모를 입력하세요..."></textarea>
+        <button id="save-btn">메모 저장</button>
+    </div>
+
+    <div class="memo-list-container">
+        <h2>내 메모 목록</h2>
+        <ul id="memo-list">
+            <!-- M2: Dynamic Content -->
+        </ul>
+        <div id="notice-area" style="margin-top: 1rem; font-size: 0.8rem; color: var(--danger-color);"></div>
+        <div id="env-status"></div>
+    </div>
+</div>
+
+<script>
+    /**
+     * M2: CRUD Logic & Stability Enhancements
+     */
+    const STORAGE_KEY = 'memos';
+    const memoInput = document.getElementById('memo-input');
+    const memoList = document.getElementById('memo-list');
+    const saveBtn = document.getElementById('save-btn');
+    const noticeArea = document.getElementById('notice-area');
+
+    function showNotice(msg, duration = 3000) {
+        noticeArea.textContent = msg;
+        if (duration > 0) {
+            setTimeout(() => { noticeArea.textContent = ''; }, duration);
+        }
+    }
+
+    // 1. loadMemos()
+    function loadMemos() {
+        const data = localStorage.getItem(STORAGE_KEY);
+        if (!data) return [];
+        try {
+            return JSON.parse(data);
+        } catch (e) {
+            console.error('M2: JSON parse failed, resetting storage.', e);
+            showNotice('! 데이터 오류로 인해 저장소가 초기화되었습니다.');
+            saveMemos([]); // Recover by resetting
+            return [];
+        }
+    }
+
+    // 2. saveMemos(memos)
+    function saveMemos(memos) {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(memos));
+        } catch (e) {
+            console.error('M2: localStorage save failed.', e);
+            showNotice('! 저장 공간이 부족하거나 저장에 실패했습니다.');
+        }
+    }
+
+    // 3. renderMemos()
+    function renderMemos() {
+        const memos = loadMemos();
+        memoList.innerHTML = '';
+
+        if (memos.length === 0) {
+            memoList.innerHTML = '<li class="empty-state">저장된 메모가 없습니다.</li>';
+            return;
+        }
+
+        // Sort by Newest
+        memos.sort((a, b) => b.createdAt - a.createdAt);
+
+        memos.forEach(memo => {
+            const li = document.createElement('li');
+            li.className = 'memo-item';
+            
+            const dateStr = new Date(memo.createdAt).toLocaleString();
+            
+            // XSS 방지: textContent 사용
+            li.innerHTML = `
+                <div class="memo-text"></div>
+                <div class="memo-footer">
+                    <span class="memo-date">${dateStr}</span>
+                    <button class="delete-btn">삭제</button>
+                </div>
+            `;
+            
+            li.querySelector('.memo-text').textContent = memo.text;
+            
+            li.querySelector('.delete-btn').addEventListener('click', () => {
+                deleteMemo(memo.id);
+            });
+
+            memoList.appendChild(li);
+        });
+    }
+
+    // 4. addMemo(text)
+    function addMemo() {
+        const text = memoInput.value.trim();
+        if (!text) {
+            showNotice('내용을 입력하세요.');
+            return;
+        }
+
+        const memos = loadMemos();
+        const newMemo = {
+            id: Date.now().toString(),
+            text: text,
+            createdAt: Date.now()
+        };
+
+        memos.push(newMemo);
+        saveMemos(memos);
+        memoInput.value = '';
+        renderMemos();
+    }
+
+    // 5. deleteMemo(id)
+    function deleteMemo(id) {
+        let memos = loadMemos();
+        memos = memos.filter(m => m.id !== id);
+        saveMemos(memos);
+        renderMemos();
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+        // Environment Status (M1 persistence)
+        const envStatus = document.getElementById('env-status');
+        try {
+            localStorage.setItem('__test__', 'ok');
+            localStorage.removeItem('__test__');
+            envStatus.innerHTML = '<span class="status-badge status-success">✓ Environment: localStorage OK (C:\\dev\\myapp007-memo1)</span>';
+        } catch (e) {
+            envStatus.innerHTML = '<span class="status-badge status-fail">✗ Environment: localStorage Error</span>';
+        }
+
+        // M2 Render
+        renderMemos();
+    });
+
+    saveBtn.addEventListener('click', addMemo);
+</script>
+
+</body>
+</html>
